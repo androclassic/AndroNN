@@ -3,27 +3,20 @@
 
 namespace andro
 {
-	 float NeuralNetwork::LearningRate = 0.0333f;
-
-	 float NeuralNetwork::Activation(float value)
-	 {
-		 return  std::tanh(value);
-	 }
-
-	 float  NeuralNetwork::ActivationDer(float value)
-	 {
-		 return  1.0f - (value * value);
-	 }
-
 
 	 NeuralNetwork::NeuralNetwork(const std::vector<int>& layers)
 	 {
 		 mLayers.resize(layers.size() - 1);
 		 for (int i = 0; i < mLayers.size(); i++)
 		 {
-			 mLayers[i] = new Layer(layers[i], layers[i + 1]);
+			 mLayers[i] = new Layer(*this, layers[i], layers[i + 1], i == (mLayers.size()-1));
 		 }
 
+		 Activation = [](float v) -> float { return std::tanh(v); };
+		 ActivationDer = [](float v) -> float {return  1.0f - (v * v); };
+		 CostDer = [](float y, float o) -> float { return  (o - y); };
+
+		 mLearningRate = 0.0333f;
 	 }
 
 	 NeuralNetwork::~NeuralNetwork()
@@ -41,11 +34,11 @@ namespace andro
 	 {
 		 _ASSERT(mLayers.size());
 
-		 mLayers[0]->ForwardProp(input, false);
+		 mLayers[0]->ForwardProp(input);
 
 		 for (int i = 1; i < mLayers.size(); i++)
 		 {
-			 mLayers[i]->ForwardProp(mLayers[i - 1]->GetOutputs(), i == (mLayers.size()-1));
+			 mLayers[i]->ForwardProp(mLayers[i - 1]->GetOutputs());
 		 }
 
 		 return  mLayers[mLayers.size() - 1]->GetOutputs();
@@ -64,18 +57,26 @@ namespace andro
 	 }
 
 
-	Layer::Layer(int nbInputs, int nbOutputs)
+	Layer::Layer(const NeuralNetwork& nn,int nbInputs, int nbOutputs, bool isOutputL)
+		:mNN(nn)
 	{
 		mNbInputs = nbInputs;
 		mNbOutputs = nbOutputs;
-		mOutputs.resize(nbOutputs);
-		mGamma.resize(nbOutputs);
-		mWeights.resize(nbInputs);
-		mWeightsDt.resize(nbInputs);
-		for (int i = 0; i < nbInputs; i++)
+		mIsOutputLayer = isOutputL;
+
+		if (!mIsOutputLayer)
+			mNbInputs++; //add bias term
+
+		mOutputs.resize(mNbOutputs);
+		mGamma.resize(mNbOutputs);
+		mWeights.resize(mNbInputs);
+		mWeightsDt.resize(mNbInputs);
+		mOffset = 0.0f;
+
+		for (int i = 0; i < mNbInputs; i++)
 		{
-			mWeights[i].resize(nbOutputs);
-			mWeightsDt[i].resize(nbOutputs);
+			mWeights[i].resize(mNbOutputs);
+			mWeightsDt[i].resize(mNbOutputs);
 		}
 		InitializeWeights();
 	}
@@ -94,20 +95,26 @@ namespace andro
 	}
 
 
-	void Layer::ForwardProp(const std::vector<float>& input, bool isLast)
+	void Layer::ForwardProp(const std::vector<float>& input)
 	{
 		mInputs = &input;
 		for (int j = 0; j < mNbOutputs; j++)
 		{
 			mOutputs[j] = 0.0f;
-			for (int i = 0; i < mNbInputs; i++)
+			for (int i = 0; i < (*mInputs).size(); i++)
 			{
 				mOutputs[j] += (mWeights[i][j] * (*mInputs)[i]) ;
 			}
 	
-			//activation
-			if (!isLast)
-				mOutputs[j] = NeuralNetwork::Activation(mOutputs[j]);
+			if (!mIsOutputLayer)
+			{
+				//bias term
+				int biasIdx = mNbInputs - 1;
+				mOutputs[j] += mWeights[biasIdx][j];
+
+				//activation
+				mOutputs[j] = mNN.Activation(mOutputs[j]);
+			}
 		}
 	}
 
@@ -116,18 +123,19 @@ namespace andro
 		for (int i = 0; i < mNbInputs; i++)
 		{
 			for (int j = 0; j < mNbOutputs; j++)
-				mWeights[i][j] -= (mWeightsDt[i][j] * NeuralNetwork::LearningRate);
+				mWeights[i][j] -= (mWeightsDt[i][j] * mNN.GetLearingRate());
 		}
 	}
 
 	void Layer::BackProOutput(const std::vector<float>& expected)
 	{
 		_ASSERT(mNbOutputs == expected.size());
+		_ASSERT(mIsOutputLayer);
 
 		for (int i = 0; i < mNbOutputs; i++)
 		{
 			//get error
-			float error = mOutputs[i] - expected[i];
+			float error = mNN.CostDer(expected[i], mOutputs[i]);
 			//gamma
 			mGamma[i] = error;
 		}
@@ -143,6 +151,7 @@ namespace andro
 
 	void Layer::BackPropHidden(const std::vector<float>& gammaForward, const DynMatf& weightsForward)
 	{
+		_ASSERT(mIsOutputLayer == false);
 
 		for (int i = 0; i < mNbOutputs; i++)
 		{
@@ -151,16 +160,23 @@ namespace andro
 			{
 				mGamma[i] +=  (gammaForward[j] * weightsForward[i][j]);
 			}
-			mGamma[i] *= NeuralNetwork::ActivationDer(mOutputs[i]);
+			mGamma[i] *= mNN.ActivationDer(mOutputs[i]);
 		}
 
 		//layer weights delta
-		for (int i = 0; i < mNbInputs; i++)
+		for (int i = 0; i < mNbInputs-1; i++)
 		{
 			for (int j = 0; j < mNbOutputs; j++)
 			{
 				mWeightsDt[i][j] = mGamma[j] * (*mInputs)[i];
 			}
+		}
+
+		//bias term
+		int biasIdx = mNbInputs - 1;
+		for (int j = 0; j < mNbOutputs; j++)
+		{
+			mWeightsDt[biasIdx][j] = mGamma[j];
 		}
 	}
 }

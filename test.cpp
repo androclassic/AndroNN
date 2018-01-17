@@ -29,25 +29,16 @@ int main()
 
 	for (int i = 0; i < 5000; i++)
 	{
-		net.FeedForward(t0); 
-		net.BackProp(e0);
-		net.FeedForward(t1); 
-		net.BackProp(e1);
-		net.FeedForward(t2); 
-		net.BackProp(e2);
-		net.FeedForward(t3); 
-		net.BackProp(e3);
-		net.FeedForward(t4); 
-		net.BackProp(e4);
-		net.FeedForward(t5); 
-		net.BackProp(e5);
-		net.FeedForward(t6); 
-		net.BackProp(e6);
-		net.FeedForward(t7); 
-		net.BackProp(e7);
+		net.FeedForward(t0); net.BackProp(e0);
+		net.FeedForward(t1); net.BackProp(e1);
+		net.FeedForward(t2); net.BackProp(e2);
+		net.FeedForward(t3); net.BackProp(e3);
+		net.FeedForward(t4); net.BackProp(e4);
+		net.FeedForward(t5); net.BackProp(e5);
+		net.FeedForward(t6); net.BackProp(e6);
+		net.FeedForward(t7); net.BackProp(e7);
 
 	}
-
 
 
 	std::cout<<"LOG: "<<(net.FeedForward(t0)[0])<<std::endl;
@@ -59,7 +50,6 @@ int main()
 	std::cout<<"LOG: "<<(net.FeedForward(t6)[0])<<std::endl;
 	std::cout<<"LOG: "<<(net.FeedForward(t7)[0])<<std::endl;
 
-
-	
+	getchar();
 	return 1;
 }

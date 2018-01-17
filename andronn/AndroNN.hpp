@@ -1,6 +1,7 @@
 #include<iostream>
 #include<vector>
 #include<algorithm>
+#include<functional>
 
 namespace andro
 {
@@ -15,12 +16,17 @@ public:
 	const std::vector<float>&  FeedForward(const std::vector<float>& input);
 	void BackProp(std::vector<float>& expected);
 
-	static float Activation(float);
-	static float ActivationDer(float);
-	static float LearningRate;
+	 std::function<float(float)> Activation;
+	 std::function<float(float)> ActivationDer;
+	 std::function<float(float expected, float output)> CostDer;
+
+	 float GetLearingRate() const { return mLearningRate; }
 
 private:
+	float mLearningRate;
+
 	std::vector<Layer*> mLayers;
+
 };
 
 
@@ -30,9 +36,9 @@ class Layer
 
 
 public:
-	Layer(int nbInputs, int nbOutputs);
+	Layer(const NeuralNetwork& nn, int nbInputs, int nbOutputs, bool isOutputLayer);
 	
-	void ForwardProp(const std::vector<float>& input, bool isLast);
+	void ForwardProp(const std::vector<float>& input);
 	void BackProOutput(const std::vector<float>& input);
 	void BackPropHidden(const std::vector<float>& gammaForward, const DynMatf& weightsForward);
 
@@ -40,6 +46,7 @@ public:
 	const std::vector<float>& GetOutputs() const { return mOutputs; }
 	const std::vector<float>& GetGamma() const { return mGamma; }
 	const DynMatf& GetWeights() const { return mWeights; }
+	bool isOutputLayer() const { return mIsOutputLayer; }
 
 	void UpdateWeights();
 private:
@@ -47,10 +54,13 @@ private:
 
 	int mNbInputs;
 	int mNbOutputs;
+	bool mIsOutputLayer;
 
+	const NeuralNetwork& mNN;
 	const std::vector<float>* mInputs;
 	std::vector<float> mOutputs;
 	std::vector<float> mGamma;
+	float mOffset;
 	DynMatf  mWeights;
 	DynMatf  mWeightsDt;
 
