@@ -12,6 +12,7 @@
 #include "opencv2/opencv.hpp"
 #include "Gaussian.hpp"
 #include "ExpectationMaximization.hpp"
+#include "Utils.hpp"
 
 using namespace cv;
 using namespace std;
@@ -45,7 +46,7 @@ void DrawGaussian(Mat img, const Gaussian& g, Scalar color = Scalar(255,255,255)
 		float p = g.pdf(x);
 
 		p2 = cv::Point((float)n / SAMPELS * WIDTH, START_Y - HEIGHT * p);
-		line(img, p1, p2, color, 10*p, 8, 0);
+		line(img, p1, p2, color, 2, 8, 0);
 		p1 = p2;
 	}
 }
@@ -80,30 +81,13 @@ void TestEM()
 	for (int i = 0; i < 100; i++)
 	{
 
-		img = Mat::zeros(HEIGHT, WIDTH, CV_8UC3);
+		img = Mat(HEIGHT, WIDTH, CV_8UC3, cv::Scalar(255,255,255));
 
-		//draw base lines
-		line(img, cv::Point(0, START_Y), cv::Point(WIDTH, START_Y), Scalar(0, 255, 0), 2, 8, 0);
-		line(img, cv::Point(WIDTH / 2, 0), cv::Point(WIDTH / 2, HEIGHT), Scalar(0, 255, 0), 1, 8, 0);
 
 		//draw gaussians
-		DrawGaussian(img, g1, Scalar(140, 80, 30));
-		DrawGaussian(img, g2, Scalar(100, 0, 100));
-		DrawGaussian(img, g3, Scalar(0, 20, 100));
-
-		int fontFace = FONT_HERSHEY_SCRIPT_SIMPLEX;
-		double fontScale = 0.35;
-		cv::Size size = getTextSize(float_to_string(1.0f), fontFace, fontScale, 1, nullptr);
-
-		//draw axis scale
-		int anotations = 30;
-		for (int n = 0; n < anotations; n++)
-		{
-			float  x = n * 2 * RANGE / anotations - RANGE;
-
-			cv::Point sampleLoc = cv::Point((float)n / anotations * WIDTH, START_Y + 2 * size.height);
-			putText(img, float_to_string(x), sampleLoc, fontFace, fontScale, Scalar(255, 255, 255));
-		}
+		DrawGaussian(img, g1, Scalar(0, 255, 255));
+		DrawGaussian(img, g2, Scalar(255, 0, 255));
+		DrawGaussian(img, g3, Scalar(0, 0, 255));
 
 		//draw points
 		float radius = 6.0f;
@@ -118,12 +102,15 @@ void TestEM()
 		const std::vector<Gaussian>& computedDistr = em.getGaussians();
 		for (auto distr : computedDistr)
 		{
-			DrawGaussian(img, distr, Scalar(255, 255, 30));
+			DrawGaussian(img, distr, Scalar(255, 0, 30));
 		}
+
+		androcv::DrawGraph(img, RANGE, 10, cv::Point(WIDTH / 2, START_Y), cv::Point(WIDTH, HEIGHT));
 
 
 		imshow("test", img);
-		waitKey();
+		if (waitKey() == 27)
+			break;
 	}
 
 }

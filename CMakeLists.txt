@@ -27,6 +27,13 @@ if(MSVC)
     file(COPY ${OPENCV_DLLS} DESTINATION "${OUTPUT_BINARIES_PATH}/Debug")
 endif(MSVC)
 
+if (OpenCV_FOUND)
+	message(STATUS "OpenCV found - building utils ")
+    add_subdirectory(utils)
+    include_directories(utils)
+else()
+	message(STATUS "OpenCV not found - skipping utils ")
+endif()
 
 
 add_subdirectory(samples)

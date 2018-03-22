@@ -4,6 +4,7 @@ add_executable(test_em testem.cpp)
 target_link_libraries(test_em
   ${OpenCV_LIBS}
   androprob
+  utilities
  )
  SET(EXECUTABLE_OUTPUT_PATH "${OUTPUT_BINARIES_PATH}")
 
