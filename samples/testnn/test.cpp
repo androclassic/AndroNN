@@ -16,7 +16,7 @@ int main()
 	// 1 1 1     => 7
 
 	srand(time(NULL));
-	NeuralNetwork net( { 3, 15, 15, 1 });
+	NeuralNetwork net({ 3, 15, 15, 1 });
 
 	std::vector<float> t0 = { 0, 0, 0 }; std::vector<float> e0 = { 0 };
 	std::vector<float> t1 = { 0, 0, 1 }; std::vector<float> e1 = { 1 };
@@ -41,14 +41,14 @@ int main()
 	}
 
 
-	std::cout<<"LOG: "<<(net.FeedForward(t0)[0])<<std::endl;
-	std::cout<<"LOG: "<<(net.FeedForward(t1)[0])<<std::endl;
-	std::cout<<"LOG: "<<(net.FeedForward(t2)[0])<<std::endl;
-	std::cout<<"LOG: "<<(net.FeedForward(t3)[0])<<std::endl;
-	std::cout<<"LOG: "<<(net.FeedForward(t4)[0])<<std::endl;
-	std::cout<<"LOG: "<<(net.FeedForward(t5)[0])<<std::endl;
-	std::cout<<"LOG: "<<(net.FeedForward(t6)[0])<<std::endl;
-	std::cout<<"LOG: "<<(net.FeedForward(t7)[0])<<std::endl;
+	std::cout << "LOG: " << (net.FeedForward(t0)[0]) << std::endl;
+	std::cout << "LOG: " << (net.FeedForward(t1)[0]) << std::endl;
+	std::cout << "LOG: " << (net.FeedForward(t2)[0]) << std::endl;
+	std::cout << "LOG: " << (net.FeedForward(t3)[0]) << std::endl;
+	std::cout << "LOG: " << (net.FeedForward(t4)[0]) << std::endl;
+	std::cout << "LOG: " << (net.FeedForward(t5)[0]) << std::endl;
+	std::cout << "LOG: " << (net.FeedForward(t6)[0]) << std::endl;
+	std::cout << "LOG: " << (net.FeedForward(t7)[0]) << std::endl;
 
 	getchar();
 	return 1;

@@ -18,9 +18,11 @@ public:
 
 	 std::function<float(float)> Activation;
 	 std::function<float(float)> ActivationDer;
+	 std::function<float(float expected, float output)> Cost;
 	 std::function<float(float expected, float output)> CostDer;
 
 	 float GetLearingRate() const { return mLearningRate; }
+	 void SetLearingRate(float lr)  { mLearningRate = lr; }
 
 private:
 	float mLearningRate;

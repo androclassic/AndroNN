@@ -14,9 +14,10 @@ namespace andro
 
 		 Activation = [](float v) -> float { return std::tanh(v); };
 		 ActivationDer = [](float v) -> float {return  1.0f - (v * v); };
+		 Cost = [](float y, float o) -> float { return  1/2.0f * (o - y) * (o - y); };
 		 CostDer = [](float y, float o) -> float { return  (o - y); };
 
-		 mLearningRate = 0.0333f;
+		 mLearningRate = 0.00533f;
 	 }
 
 	 NeuralNetwork::~NeuralNetwork()
