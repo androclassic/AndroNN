@@ -31,15 +31,15 @@ namespace androcv
 		//draw x axis scale 
 		for (int n = 0; n < x_Scale; n++)
 		{
-			float x_p = origin.x + static_cast<float>(n) / x_Scale * (graph_size.x - origin.x);
-			float x_n = origin.x - static_cast<float>(n) / x_Scale * (graph_size.x - origin.x);
+			float x_p = origin.x + static_cast<float>(n) / x_Scale * (graph_size.x);
+			float x_n = origin.x - static_cast<float>(n) / x_Scale * (graph_size.x);
 
 			if (n%line_space_x == 0)
 			{
 				//draw x line scale pos
-				line(img, cv::Point(x_p, 0), cv::Point(x_p, graph_size.y), Scalar(0, 0, 0), 1, 8, 0);
+				line(img, cv::Point(x_p, origin.y - graph_size.y), cv::Point(x_p, origin.y + graph_size.y), Scalar(0, 0, 0), 1, 8, 0);
 				//draw x line scale neg
-				line(img, cv::Point(x_n, 0), cv::Point(x_n, graph_size.y), Scalar(0, 0, 0), 1, 8, 0);
+				line(img, cv::Point(x_n, origin.y - graph_size.y), cv::Point(x_n, origin.y + graph_size.y), Scalar(0, 0, 0), 1, 8, 0);
 			}
 
 			//draw x anotation scale pos
@@ -54,15 +54,15 @@ namespace androcv
 		//draw  y axis scale
 		for (int n = 0; n < y_Scale; n++)
 		{
-			float y_p = origin.y - static_cast<float>(n) / y_Scale * (origin.y);
-			float y_n = origin.y + static_cast<float>(n) / y_Scale * (origin.y);
+			float y_p = origin.y - static_cast<float>(n) / y_Scale * (graph_size.y);
+			float y_n = origin.y + static_cast<float>(n) / y_Scale * (graph_size.y);
 
-			if (n%line_space_x == 0)
+			if (n%line_space_y == 0)
 			{
 				//draw y line scale pos
-				line(img, cv::Point(0, y_p), cv::Point(graph_size.x, y_p), Scalar(0, 0, 0), 1, 8, 0);
+				line(img, cv::Point(origin.x - graph_size.x, y_p), cv::Point(origin.x + graph_size.x, y_p), Scalar(0, 0, 0), 1, 8, 0);
 				//draw y line scale neg
-				line(img, cv::Point(0, y_n), cv::Point(graph_size.x, y_n), Scalar(0, 0, 0), 1, 8, 0);
+				line(img, cv::Point(origin.x - graph_size.x, y_n), cv::Point(origin.x + graph_size.x, y_n), Scalar(0, 0, 0), 1, 8, 0);
 			}
 
 			//draw y anotation scale pos
@@ -76,8 +76,49 @@ namespace androcv
 		}
 
 		//draw base lines
-		line(img, cv::Point(0, origin.y), cv::Point(graph_size.x, origin.y), Scalar(0, 255, 0), 2, 8, 0);
-		line(img, cv::Point(origin.x, 0), cv::Point(origin.x, graph_size.y), Scalar(0, 255, 0), 2, 8, 0);
+		line(img, cv::Point(origin.x -graph_size.x, origin.y), cv::Point(origin.x + graph_size.x, origin.y), Scalar(0, 255, 0), 2, 8, 0);
+		line(img, cv::Point(origin.x, origin.y - graph_size.y), cv::Point(origin.x, origin.y  + graph_size.y), Scalar(0, 255, 0), 2, 8, 0);
 
 	}
+
+
+
+	int Controls(Point& origin, Point& size)
+	{
+		const int move_factor = 3;
+		const float zoom_factor = 1.25;
+		int c = waitKey();
+		switch (c)
+		{
+			case 'Q':
+			case 'q':
+				size.y *= zoom_factor;
+				size.x *= zoom_factor;
+				break;
+			case 'E':
+			case 'e':
+				size.y /= zoom_factor;
+				size.x /= zoom_factor;
+				break;
+
+			case 2490368: // up arrow
+				origin.y -= move_factor;
+				break;
+			case 2424832:  // right arrow 
+				origin.x -= move_factor;
+				break;
+
+			case 2621440: //down arrow
+				origin.y += move_factor;
+				break;
+
+			case 2555904: // left arrow
+				origin.x += move_factor;
+				break;
+		}
+
+		return c;
+	}
+	
+
 }
