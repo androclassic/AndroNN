@@ -49,15 +49,20 @@ void DrawFunction(Mat& img, int N, int x_Scale, int y_Scale, cv::Point origin, c
 void PlotProb()
 {
 	std::vector<float> points;
-	const int WIDTH = 1980;
-	const int HEIGHT = 1080;
+	const int WIDTH = 1280;
+	const int HEIGHT = 720;
 	const float START_Y = HEIGHT - HEIGHT / 30;
 	const int START_X = WIDTH / 30;
 	int N = 30;
 
 
+	//Create a window
+	namedWindow("ImageDisplay", 1);
+	//set the callback function for any mouse event
+	setMouseCallback("ImageDisplay", androcv::MouseControl::CallBackFunc, NULL);
+
+
 	Mat img = Mat(HEIGHT, WIDTH, CV_8UC3, cv::Scalar(255, 255, 255));
-	
 	cv::Point origin(START_X, START_Y);
 	cv::Point size(WIDTH, HEIGHT);
 	bool exit = false;
@@ -68,10 +73,19 @@ void PlotProb()
 		//draw function
 		DrawFunction(img, N, 1, 1, origin, size);
 		androcv::DrawGraph(img, N, 100, origin, size);
-		exit = androcv::Controls(origin, size) == 27;
-		
-		imshow("test", img);
+		int c = androcv::Controls(origin, size);
 
+		if(androcv::MouseControl::isLBPressed())
+		{
+			origin -= androcv::MouseControl::getMove();
+		}
+
+		if (c == 't') { N++; }
+		else if(c =='r') { N--; }
+		exit = c == 27;
+
+		//show the image
+		imshow("ImageDisplay", img);
 	}
 
 }

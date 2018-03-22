@@ -87,7 +87,7 @@ namespace androcv
 	{
 		const int move_factor = 3;
 		const float zoom_factor = 1.25;
-		int c = waitKey();
+		int c = waitKey(40);
 		switch (c)
 		{
 			case 'Q':
@@ -101,23 +101,50 @@ namespace androcv
 				size.x /= zoom_factor;
 				break;
 
-			case 2490368: // up arrow
+			case 'W':
+			case 'w':
 				origin.y -= move_factor;
 				break;
-			case 2424832:  // right arrow 
+			case 'D':
+			case 'd':
 				origin.x -= move_factor;
 				break;
 
-			case 2621440: //down arrow
+			case 'S':
+			case 's':
 				origin.y += move_factor;
 				break;
 
-			case 2555904: // left arrow
+			case 'A':
+			case 'a':
 				origin.x += move_factor;
 				break;
 		}
 
 		return c;
+	}
+
+
+	 bool MouseControl::left_buton_pressed = false;
+	 cv::Point  MouseControl::mouse_pos = Point();
+	 cv::Point  MouseControl::mouse_move = Point();
+
+	void MouseControl::CallBackFunc(int event, int x, int y, int flags, void* userdata)
+	{
+		Point _current_pos(x, y);
+
+		if (event == EVENT_LBUTTONDOWN)
+		{
+			left_buton_pressed = true;
+		}
+		if (event == EVENT_LBUTTONUP)
+		{
+			left_buton_pressed = false;
+		}
+
+
+		mouse_move =  mouse_pos - _current_pos;
+		mouse_pos = _current_pos;
 	}
 	
 

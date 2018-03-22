@@ -57,12 +57,16 @@ void TestEM()
 	const float u2 = 7; const float s2 = 1.0f;
 	const float u3 = -6; const float s3 = 0.7f;
 
-
 	std::random_device rd{};
 	std::mt19937 gen{ rd() };
 
 	std::vector<float> points;
 	Mat img = Mat::zeros(HEIGHT, WIDTH, CV_8UC3);
+
+	//Create a window
+	namedWindow("ImageDisplay", 1);
+	//set the callback function for any mouse event
+	setMouseCallback("ImageDisplay", androcv::MouseControl::CallBackFunc, NULL);
 
 	Gaussian g1(u1, s1);	std::normal_distribution<> d1{ u1, s1 };
 	Gaussian g2(u2, s2);	std::normal_distribution<> d2{ u2, s2 };
@@ -77,7 +81,6 @@ void TestEM()
 	}
 
 	//text EM
-
 	androprob::EM em(3);
 	em.Train(points);
 
@@ -117,10 +120,14 @@ void TestEM()
 		}
 
 		exit = control == 27;
-		imshow("test", img);
 
+		if (androcv::MouseControl::isLBPressed())
+		{
+			origin -= androcv::MouseControl::getMove();
+		}
+
+		imshow("ImageDisplay", img);
 	}
-
 }
 
 int main(int argc, char *argv[])
